@@ -15,9 +15,9 @@
   
   <meta name="theme-color" content="#2f4154">
   <meta name="description" content="">
-  <meta name="author" content="John Doe">
+  <meta name="author" content="Xander Wang">
   <meta name="keywords" content="">
-  <title>Hexo</title>
+  <title>xander的小博客</title>
 
   <link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/css/bootstrap.min.css" />
 <link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/4.0.0/github-markdown.min.css" />
@@ -50,7 +50,7 @@
     <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
   <div class="container">
     <a class="navbar-brand"
-       href="/">&nbsp;<strong>Fluid</strong>&nbsp;</a>
+       href="/">&nbsp;<strong>xander的小博客</strong>&nbsp;</a>
 
     <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
             data-target="#navbarSupportedContent"
@@ -119,7 +119,7 @@
 </nav>
 
     <div class="view intro-2" id="background" parallax=true
-         style="background: url('/img/default.png') no-repeat center center;
+         style="background: url('/img/head_bg.png') no-repeat center center;
            background-size: cover;">
       <div class="full-bg-img">
         <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
@@ -174,6 +174,160 @@ Quick</div>
             <i class="iconfont icon-date"></i>&nbsp;2020-05-04
           </div>
         
+        
+        
+      </div>
+    </div>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <div class="col-12 col-md-12 mx-auto index-info">
+      <a class="index-header" href="/2018/05/15/2018-05-15-openstack-default-port-mod/">Openstack Horizon 默认端口号修改</a>
+
+      <a href="/2018/05/15/2018-05-15-openstack-default-port-mod/" class="index-excerpt">
+        
+        
+          
+        
+        <div>null
+
+
+改/etc/httpd/conf/ports.confhttpd的监听端口，80改成其他端口
+
+改/etc/httpd/conf.d/下的15-default.conf和15-horizon_vhost默认主机端口与Horizon主机端口，VirtualHost *:80的80改为其它端口
+
+重启http服务器
+
+
+systemctl restart httpd.service
+
+
+</div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>&nbsp;2018-05-15
+          </div>
+        
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-category"></i>
+            
+              <a href="/categories/%E4%BA%91/">云</a>
+            
+          </div>
+        
+        
+      </div>
+    </div>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <div class="col-12 col-md-12 mx-auto index-info">
+      <a class="index-header" href="/2018/05/14/2018-05-13-Openstack%20%E4%B8%80%E9%94%AE%E8%84%9A%E6%9C%AC%E9%83%A8%E7%BD%B2/">Openstack 一键测试部署</a>
+
+      <a href="/2018/05/14/2018-05-13-Openstack%20%E4%B8%80%E9%94%AE%E8%84%9A%E6%9C%AC%E9%83%A8%E7%BD%B2/" class="index-excerpt">
+        
+        
+          
+        
+        <div>实验室组织参加软件杯，对云平台有需求，但毕竟没有太多的时间部署完整的组件，所以就搜集了一波资料，一键部署Openstack。仅供测试。
+Openstack含有很多组件，负责不同的功能，在这不做赘述。
+Openstack的百科：
+
+OpenStack是一个由NASA（美国国家航空航天局）和Rackspace合作研发并发起的，以Apache许可证授权的自由软件和开放源代码项目。
+
+
+OpenStac</div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>&nbsp;2018-05-14
+          </div>
+        
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-category"></i>
+            
+              <a href="/categories/%E4%BA%91/">云</a>
+            
+          </div>
+        
+        
+      </div>
+    </div>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <div class="col-12 col-md-12 mx-auto index-info">
+      <a class="index-header" href="/2018/05/13/2018-05-11-Cloudera%20Manager%20&%20CDH%20%E9%83%A8%E7%BD%B2/">Cloudera Manager &amp; CDH 部署</a>
+
+      <a href="/2018/05/13/2018-05-11-Cloudera%20Manager%20&%20CDH%20%E9%83%A8%E7%BD%B2/" class="index-excerpt">
+        
+        
+          
+        
+        <div>见简书：https://www.jianshu.com/p/434a429a9c6e
+</div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>&nbsp;2018-05-13
+          </div>
+        
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-category"></i>
+            
+              <a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a>
+            
+          </div>
+        
+        
+      </div>
+    </div>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <div class="col-12 col-md-12 mx-auto index-info">
+      <a class="index-header" href="/2018/05/12/2018-05-12-IRC%20%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%90%AD%E5%BB%BA%E4%B8%8E%E6%B5%8B%E8%AF%95/">IRC 服务器搭建与测试</a>
+
+      <a href="/2018/05/12/2018-05-12-IRC%20%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%90%AD%E5%BB%BA%E4%B8%8E%E6%B5%8B%E8%AF%95/" class="index-excerpt">
+        
+        
+          
+        
+        <div>
+IRC是Internet Relay Chat 的英文缩写，中文一般称为互联网中继聊天。它是由芬兰人Jarkko Oikarinen于1988年首创的一种网络聊天协议。经过十年的发展，目前世界上有超过60个国家提供了IRC的服务。IRC的工作原理非常简单，您只要在自己的PC上运行客户端软件，然后通过因特网以IRC协议连接到一台IRC服务器上即可。它的特点是速度非常之快，聊天时几乎没有延迟的现象，</div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>&nbsp;2018-05-12
+          </div>
+        
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-category"></i>
+            
+              <a href="/categories/%E6%9C%8D%E5%8A%A1/">服务</a>
+            
+          </div>
         
         
       </div>
@@ -271,10 +425,10 @@ Quick</div>
     var typed = new Typed('#subtitle', {
       strings: [
         '  ',
-        "An elegant Material-Design theme for Hexo&nbsp;",
+        "Stay hungry, stay foolish.&nbsp;",
       ],
       cursorChar: "_",
-      typeSpeed: 70,
+      typeSpeed: 15,
       loop: false,
     });
     typed.stop();

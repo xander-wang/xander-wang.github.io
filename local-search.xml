@@ -16,5 +16,81 @@
   
   
   
+  <entry>
+    <title>Openstack Horizon 默认端口号修改</title>
+    <link href="/2018/05/15/2018-05-15-openstack-default-port-mod/"/>
+    <url>/2018/05/15/2018-05-15-openstack-default-port-mod/</url>
+    
+    <content type="html"><![CDATA[<p>null</p><hr><ul><li><p>改<code>/etc/httpd/conf/ports.conf</code>httpd的监听端口，80改成其他端口</p></li><li><p>改<code>/etc/httpd/conf.d/</code>下的<code>15-default.conf</code>和<code>15-horizon_vhost</code>默认主机端口与Horizon主机端口，<code>VirtualHost *:80</code>的80改为其它端口</p></li><li><p>重启http服务器</p></li></ul><pre><code class="hljs shell">systemctl restart httpd.service</code></pre><ul><li>修改防火墙规则（测试环境关闭了防火墙，这里就没有做测试了。）</li></ul><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 查找现有规则，记住行号</span>iptables -L -n --line-numbers<span class="hljs-meta">#</span><span class="bash"> 在对应行号插入新规则</span>iptables -I INPUT 11 -p tcp -m multiport --dports **** -j ACCEPT -m comment --comment "001 horizon **** incoming"<span class="hljs-meta">#</span><span class="bash"> 保存规则</span>service iptables save<span class="hljs-meta">#</span><span class="bash"> 找到旧规则对应的行号，删除，保存规则</span>iptables -L -n --line-numbersiptables -D INPUT 12service iptables save</code></pre><hr><p>over.</p>]]></content>
+    
+    
+    <categories>
+      
+      <category>云</category>
+      
+    </categories>
+    
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>Openstack 一键测试部署</title>
+    <link href="/2018/05/14/2018-05-13-Openstack%20%E4%B8%80%E9%94%AE%E8%84%9A%E6%9C%AC%E9%83%A8%E7%BD%B2/"/>
+    <url>/2018/05/14/2018-05-13-Openstack%20%E4%B8%80%E9%94%AE%E8%84%9A%E6%9C%AC%E9%83%A8%E7%BD%B2/</url>
+    
+    <content type="html"><![CDATA[<p>实验室组织参加软件杯，对云平台有需求，但毕竟没有太多的时间部署完整的组件，所以就搜集了一波资料，一键部署Openstack。仅供测试。</p><p>Openstack含有很多组件，负责不同的功能，在这不做赘述。</p><p>Openstack的百科：</p><blockquote><p>OpenStack是一个由NASA（美国国家航空航天局）和Rackspace合作研发并发起的，以Apache许可证授权的自由软件和开放源代码项目。</p></blockquote><blockquote><p>OpenStack是一个开源的云计算管理平台项目，由几个主要的组件组合起来完成具体工作。OpenStack支持几乎所有类型的云环境，项目目标是提供实施简单、可大规模扩展、丰富、标准统一的云计算管理平台。OpenStack通过各种互补的服务提供了基础设施即服务（IaaS）的解决方案，每个服务提供API以进行集成。</p></blockquote><blockquote><p>OpenStack是一个旨在为公共及私有云的建设与管理提供软件的开源项目。它的社区拥有超过130家企业及1350位开发者，这些机构与个人都将OpenStack作为基础设施即服务（IaaS）资源的通用前端。OpenStack项目的首要任务是简化云的部署过程并为其带来良好的可扩展性。本文希望通过提供必要的指导信息，帮助大家利用OpenStack前端来设置及管理自己的公共云或私有云。</p></blockquote><blockquote><p>OpenStack云计算平台，帮助服务商和企业内部实现类似于 Amazon EC2 和 S3 的云基础架构服务(Infrastructure as a Service, IaaS)。OpenStack 包含两个主要模块：Nova 和 Swift，前者是 NASA 开发的虚拟服务器部署和业务计算模块；后者是 Rackspace开发的分布式云存储模块，两者可以一起用，也可以分开单独用。OpenStack除了有 Rackspace 和 NASA 的大力支持外，还有包括 Dell、Citrix、 Cisco、 Canonical等重量级公司的贡献和支持，发展速度非常快，有取代另一个业界领先开源云平台 Eucalyptus 的态势。</p></blockquote><p>下面切入正题。</p><hr><h1 id="OS"><a href="#OS" class="headerlink" title="OS"></a>OS</h1><p>本篇基于<code>CentOS-7-x86_64-Minimal-1804</code>，附上<a href="https://mirrors.tuna.tsinghua.edu.cn/centos/7.5.1804/isos/x86_64/CentOS-7-x86_64-Minimal-1804.iso" target="_blank" rel="noopener">TUNA</a>的下载链接。</p><p>配置不要太低，不建议在笔记本及低配置的台式机上安装。</p><br># 前期准备<h2 id="关闭selinux并重启机器"><a href="#关闭selinux并重启机器" class="headerlink" title="关闭selinux并重启机器"></a>关闭<code>selinux</code>并重启机器</h2><pre><code class="hljs shell">vim /etc/selinux/config<span class="hljs-meta">#</span><span class="bash"> enforcing 改为 disabled</span>reboot 0</code></pre><h2 id="IP-地址"><a href="#IP-地址" class="headerlink" title="IP 地址"></a>IP 地址</h2><p>请使用静态IP。</p><h2 id="安装-wget"><a href="#安装-wget" class="headerlink" title="安装 wget"></a>安装 <code>wget</code></h2><pre><code class="hljs shell">yum -y install wget</code></pre><h2 id="更换-CentOS-源"><a href="#更换-CentOS-源" class="headerlink" title="更换 CentOS 源"></a>更换 CentOS 源</h2><pre><code class="hljs shell">cd /etc/yum.repos.d<span class="hljs-meta">#</span><span class="bash"> 备份原有源</span>mv CentOS-Base.repo CentOS-Base.repo.bak<span class="hljs-meta">#</span><span class="bash"> 下载阿里云的 CentOS 7 源</span>wget http://mirrors.aliyun.com/repo/Centos-7.repo<span class="hljs-meta">#</span><span class="bash"> 使其生效</span>mv  Centos-7.repo CentOS-Base.repoyum clean allyum makecache</code></pre><h2 id="同步时间"><a href="#同步时间" class="headerlink" title="同步时间"></a>同步时间</h2><p>安装并配置启动ntp。因为是测试部署且服务器时间一般均正确，跳过。</p><br># 开始安装<h2 id="下载一键安装组件openstack-packstack"><a href="#下载一键安装组件openstack-packstack" class="headerlink" title="下载一键安装组件openstack-packstack"></a>下载一键安装组件<a href="https://wiki.openstack.org/wiki/Packstack" target="_blank" rel="noopener"><code>openstack-packstack</code></a></h2><pre><code class="hljs shell">yum install -y http://rdo.fedorapeople.org/rdo-release.rpmyum install -y openstack-packstack</code></pre><h2 id="关闭NetworkManager和防火墙"><a href="#关闭NetworkManager和防火墙" class="headerlink" title="关闭NetworkManager和防火墙"></a>关闭<code>NetworkManager</code>和防火墙</h2><pre><code class="hljs shell">systemctl stop NetworkManagersystemctl disable NetworkManagersystemctl stop firewalldsystemctl disable firewalld</code></pre><h2 id="启动部署脚本"><a href="#启动部署脚本" class="headerlink" title="启动部署脚本"></a>启动部署脚本</h2><pre><code class="hljs shell">packstack --allinon</code></pre><h3 id="编码问题ValueError-unknown-locale-UTF-8解决"><a href="#编码问题ValueError-unknown-locale-UTF-8解决" class="headerlink" title="编码问题ValueError: unknown locale: UTF-8解决"></a>编码问题<code>ValueError: unknown locale: UTF-8</code>解决</h3><p>在系统环境变量（<code>/etc/profile</code>）中添加如下条目：</p><pre><code class="hljs shell">export LANG="en_US.UTF-8"export LC_COLLATE="en_US.UTF-8"export LC_CTYPE="en_US.UTF-8"export LC_MESSAGES="en_US.UTF-8"export LC_MONETARY="en_US.UTF-8"export LC_NUMERIC="en_US.UTF-8"export LC_TIME="en_US.UTF-8"export LC_ALL=</code></pre><p>并使之生效。</p><pre><code class="hljs shell">source /etc/profile</code></pre><h3 id="Python执行时No-module-named-pkg-resources错误解决"><a href="#Python执行时No-module-named-pkg-resources错误解决" class="headerlink" title="Python执行时No module named pkg_resources错误解决"></a>Python执行时<code>No module named pkg_resources</code>错误解决</h3><p>手动下载<code>distribute</code>至服务器：</p><pre><code class="hljs shell">wget http://www.ld80.cn/zb_users/upload/2018/04/201804031522768135203196.zip</code></pre><p>安装并使用unzip解压，修改<code>distribute_setup.py</code>，执行。</p><pre><code class="hljs shell">yum -y install unzipunzip distribute_setup.zipvim distributed_setup.py<span class="hljs-meta">#</span><span class="bash"> 定位至http，修改其为https：</span>/http<span class="hljs-meta">#</span><span class="bash"> 执行</span>python distribute_setup.py</code></pre><hr><p>接下来应该就可以进入正常的自动化安装过程了。整个过程需等待1小时左右。安装完成后以<code>http://[你的IP]/dashboard</code>登陆进入Openstack控制台。</p><p><img src="/img/openstack_success.jpg" srcset="/img/loading.gif" alt=""></p><h2 id="查看默认密码"><a href="#查看默认密码" class="headerlink" title="查看默认密码"></a>查看默认密码</h2><pre><code class="hljs shell">cat /root/keystonerc_admin</code></pre><p>Have fun!</p><p><img src="/img/openstack_dashboard.png" srcset="/img/loading.gif" alt=""></p><hr><p>上传镜像如果出现问题，可这样解决：</p><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 身份验证</span>source ~/keystonerc_admin<span class="hljs-meta">#</span><span class="bash"> 终端操作</span>glance image-create --name ubuntu --file ~/xenial-server-cloudimg-amd64-uefi1.img --disk-format qcow2 --container-format bare</code></pre><p>解释：</p><ul><li><p>-name NAME 上传完镜像在openstack中显示的名称；</p></li><li><p>-disk-format DISK_FORMAT 镜像格式；openstack支持的格式详情请看官方介绍；</p></li><li><p>-container-format CONTAINER_FORMAT 图片的容器格式，可以是ami,ari,aki,ovf,bare默认是bare</p></li><li><p>-owner TENANT_ID 那个租户可以使用此镜像</p></li><li><p>-size SIZE 这个镜像的大小</p></li><li><p>-min-disk DISK_GB 这个镜像启动最小需要的大小；</p></li><li><p>-min-ram DISK_RAM 启动这个镜像需要的最小内存；</p></li><li><p>-location IMAGE_URL 在web界面中可以使用url地址上传镜像，目前支持http协议的；</p></li><li><p>-file FILE 镜像所在本地目录；</p></li><li><p>-checksum CHECKSUM 镜像数据验证；</p></li><li><p>-is-public [true/false] 是否共享此镜像；共享后其他用户也可以使用此镜像启动instance；</p></li></ul><p>若noVNC连接失败，请添加[ip] openstack到hosts中。</p>]]></content>
+    
+    
+    <categories>
+      
+      <category>云</category>
+      
+    </categories>
+    
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>Cloudera Manager &amp; CDH 部署</title>
+    <link href="/2018/05/13/2018-05-11-Cloudera%20Manager%20&amp;%20CDH%20%E9%83%A8%E7%BD%B2/"/>
+    <url>/2018/05/13/2018-05-11-Cloudera%20Manager%20&amp;%20CDH%20%E9%83%A8%E7%BD%B2/</url>
+    
+    <content type="html"><![CDATA[<p><a href="https://www.jianshu.com/p/434a429a9c6e" target="_blank" rel="noopener">见简书：https://www.jianshu.com/p/434a429a9c6e</a></p>]]></content>
+    
+    
+    <categories>
+      
+      <category>大数据</category>
+      
+    </categories>
+    
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>IRC 服务器搭建与测试</title>
+    <link href="/2018/05/12/2018-05-12-IRC%20%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%90%AD%E5%BB%BA%E4%B8%8E%E6%B5%8B%E8%AF%95/"/>
+    <url>/2018/05/12/2018-05-12-IRC%20%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%90%AD%E5%BB%BA%E4%B8%8E%E6%B5%8B%E8%AF%95/</url>
+    
+    <content type="html"><![CDATA[<blockquote><p>IRC是Internet Relay Chat 的英文缩写，中文一般称为互联网中继聊天。它是由芬兰人Jarkko Oikarinen于1988年首创的一种网络聊天协议。经过十年的发展，目前世界上有超过60个国家提供了IRC的服务。IRC的工作原理非常简单，您只要在自己的PC上运行客户端软件，然后通过因特网以IRC协议连接到一台IRC服务器上即可。它的特点是速度非常之快，聊天时几乎没有延迟的现象，并且只占用很小的带宽资源。所有用户可以在一个被称为&quot;Channel&quot;（频道）的地方就某一话题进行交谈或密谈。每个IRC的使用者都有一个Nickname（昵称）。</p></blockquote><p>搭建IRC服务器主要是为了和研究团队的成员们保持联系。下面简单说一下自主搭建IRC服务器的过程。</p><hr><h1 id="安装-UnrealIRCd"><a href="#安装-UnrealIRCd" class="headerlink" title="安装 UnrealIRCd"></a>安装 UnrealIRCd</h1><p><a href="https://www.unrealircd.org" target="_blank" rel="noopener">UnrealIRCd</a>是一个IRC服务端守护进程。具体的可以看官方的说明.</p><blockquote><p>UnrealIRCd is an Open Source IRC Server, serving thousands of networks since 1999. It runs on Linux, OS X and Windows and is currently the most widely deployed IRCd with a market share of over 50%. UnrealIRCd is a highly advanced IRCd with a strong focus on modularity, an advanced and highly configurable configuration file. Key features include SSL, cloaking, its advanced anti-flood and anti-spam systems, swear filtering and module support. We are also particularly proud on our extensive online documentation.</p></blockquote><p><a href="https://www.unrealircd.org/docs/Installing_from_source" target="_blank" rel="noopener">官方文档</a>里安装过程也说的很明白了，下面总结一下。</p><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 测试环境为 Ubuntu 16.04 LTS</span><span class="hljs-meta">#</span><span class="bash"> 注意不要以root身份安装，可能会导致安全问题。</span><span class="hljs-meta">#</span><span class="bash"> 首先下载最新的源码</span>wget --no-check-certificate --trust-server-names https://www.unrealircd.org/downloads/unrealircd-latest.tar.gz<span class="hljs-meta">#</span><span class="bash"> 解压并进入目录</span>tar -zxvf unrealircd-4.0.17cd unrealircd-4.0.17<span class="hljs-meta">#</span><span class="bash"> 运行配置（注意大小写）</span><span class="hljs-meta">#</span><span class="bash"> 如果机器没有安装gcc、make、openssl-devel等可能会报错。按照错误提示安装即可。</span><span class="hljs-meta">#</span><span class="bash"> 默认配置一路回车即可，组织名称可按需配置。</span>./Config <span class="hljs-meta">#</span><span class="bash"> make &amp; install</span>makemake install<span class="hljs-meta">#</span><span class="bash"> 进入到安装的目录（默认为～下），复制配置文件模版并启动</span>cd ~/unrealircdcp conf/examples/example.conf conf/unrealircd.conf</code></pre><p>如果启动失败，可去官方的<a href="https://www.unrealircd.org/docs/FAQ" target="_blank" rel="noopener">FAQ</a>界面寻求帮助，以下列出我遇到的一些问题。<br><br></p><p><img src="/img/irc-err0.jpeg" srcset="/img/loading.gif" alt=""></p><p>主要是默认信息没有修改和密钥的问题，对应着行号解决一下。</p><p><img src="/img/irc-err1.jpeg" srcset="/img/loading.gif" alt=""></p><p>修改oper后面的name和下面的password。</p><p>第二和第三条报错注释里说了怎么解决。执行如下命令然后把生成的key贴到cloak-keys的第二三条即可。</p><pre><code class="hljs shell">./unrealircd gencloak</code></pre><p>最后一条错误改一下邮箱即可。</p><p>别忘了加分号。</p><p>贴一下启动成功的图。</p><p><img src="/img/irc-success.jpeg" srcset="/img/loading.gif" alt=""></p><p>可能还需要添加防火墙例外（或ECS安全策略）以确保外部访问正常。</p><hr><p><del>## 补充内容</p><p><del>如果想开启iOS端的消息推送（仅限Mutter），还需配置IRC服务端连接至苹果推送服务。Mutter提供了<a href="https://bitbucket.org/jmclough/mutter-push/overview" target="_blank" rel="noopener">Mutter Push ZNC Module</a>，点击以查看更多，下面简单翻译一下。</p><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 下载并解压模块，进入解压出的文件夹</span>wget https://bitbucket.org/jmclough/mutter-push/get/master.zipunzip -d mutter -j master.zipcd mutter<span class="hljs-meta">#</span><span class="bash"> 安装依赖（Python、requests包）</span>sudo apt-get install python3-pipsudo pip3 install requests<span class="hljs-meta">#</span><span class="bash"> 加载 ModPython 模块</span>/znc loadmod modpython<span class="hljs-meta">#</span><span class="bash"> 拷贝模块至模块目录下</span>cp mutter.py ~/.znc/modules/<span class="hljs-meta">#</span><span class="bash"> 加载ZNC模块</span>/znc loadmod mutter</code></pre><hr><h1 id="客户端安装与测试"><a href="#客户端安装与测试" class="headerlink" title="客户端安装与测试"></a>客户端安装与测试</h1><p>简单介绍一下不同环境下IRC客户端的安装。客户端采用基于终端的<a href="https://irssi.org" target="_blank" rel="noopener">Irssi</a>，经典的IRC文本聊天器。相关GUI版本在此不作介绍。</p><h2 id="NIX"><a href="#NIX" class="headerlink" title="*NIX"></a>*NIX</h2><p>仅介绍macOS和Ubuntu环境，其他环境相差无几。</p><h3 id="macOS"><a href="#macOS" class="headerlink" title="macOS"></a>macOS</h3><p>如果mac上从安装包管理工具，请先安装brew（或需要先安装Xcode并运行一次，安装相关开发者工具）。</p><p>依次运行下面的命令安装Homebrew，更新源并安装Irssi</p><pre><code class="hljs shell">/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"brew updatebrew install irssi</code></pre><p>如果速度慢则请参考LUG@USTC考虑更换Homebrew源。</p><p><a href="https://lug.ustc.edu.cn/wiki/mirrors/help/brew.git" target="_blank" rel="noopener">替换及重置Homebrew默认源</a></p><p><a href="https://lug.ustc.edu.cn/wiki/mirrors/help/homebrew-bottles" target="_blank" rel="noopener">Homebrew Bottles源</a></p><p>安装完成后运行irssi。</p><pre><code class="hljs shell">irssi</code></pre><p>简单介绍一下Irssi中的入门命令。</p><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 连接到服务器</span>/connect [IP]<span class="hljs-meta">#</span><span class="bash"> 更改昵称（可选）</span>/nick [nickname]<span class="hljs-meta">#</span><span class="bash"> 加入频道（若无则创建）</span>/channel [channel]<span class="hljs-meta">#</span><span class="bash"> 退出当前频道</span>/wc<span class="hljs-meta">#</span><span class="bash"> 断开服务器</span>/disconnect<span class="hljs-meta">#</span><span class="bash"> 退出程序</span>/quit<span class="hljs-meta">#</span><span class="bash"> 帮助</span>/help<span class="hljs-meta">#</span><span class="bash"> 命令帮助</span>/help [command]</code></pre><p>进一步操作可参考<a href="https://irssi.org/documentation/" target="_blank" rel="noopener">官方完备的说明文档</a>。</p><h3 id="Ubuntu"><a href="#Ubuntu" class="headerlink" title="Ubuntu"></a>Ubuntu</h3><p>与macOS类似，简单介绍一下。</p><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 更新源并安装</span>sudo apt-get updatesudo apt-get install irssi<span class="hljs-meta">#</span><span class="bash"> 运行</span>irssi<span class="hljs-meta">#</span><span class="bash"> 下面的操作参考macOS中的介绍</span></code></pre><h2 id="Windows"><a href="#Windows" class="headerlink" title="Windows"></a>Windows</h2><p>在Windows下，推荐使用WSL(Windows Subsystem for Linux)，然后参考Ubuntu的安装和操作进行。相关的GUI版本在此不作介绍。</p><p><a href="https://blog.csdn.net/kkkloveyou/article/details/54897586" target="_blank" rel="noopener">如何安装WSL</a></p><h2 id="移动端"><a href="#移动端" class="headerlink" title="移动端"></a>移动端</h2><h3 id="iOS"><a href="#iOS" class="headerlink" title="iOS"></a>iOS</h3><p>在App Store搜索Mutter并安装。</p><p>安装后打开Mutter，点击左上角的加号添加服务器。输入名称、IP或域名、昵称等添加一个连接。</p><p>进入服务器后，点击右上角的三个点，变更频道至协商好的频道（别忘了#号）。</p><p>Let’s chat.</p><h3 id="Android"><a href="#Android" class="headerlink" title="Android"></a>Android</h3><p>Android下的客户端众多，根据喜好选择下载即可。推荐一款liteIRC。</p><p>好了，就这么多，有空再更。</p>]]></content>
+    
+    
+    <categories>
+      
+      <category>服务</category>
+      
+    </categories>
+    
+    
+  </entry>
+  
+  
+  
   
 </search>

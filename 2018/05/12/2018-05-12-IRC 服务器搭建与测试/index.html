@@ -17,7 +17,7 @@
   <meta name="description" content="">
   <meta name="author" content="Xander Wang">
   <meta name="keywords" content="">
-  <title>Hello World - xander的小博客</title>
+  <title>IRC 服务器搭建与测试 - xander的小博客</title>
 
   <link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/css/bootstrap.min.css" />
 <link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/4.0.0/github-markdown.min.css" />
@@ -132,8 +132,8 @@
               
                 <div class="mt-3 post-meta">
                   <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-                  <time datetime="2020-05-04 02:12">
-                    2020年5月4日 凌晨
+                  <time datetime="2018-05-12 11:12">
+                    2018年5月12日 上午
                   </time>
                 </div>
               
@@ -143,7 +143,7 @@
                   
                   <span class="post-meta mr-2">
                     <i class="iconfont icon-chart"></i>
-                    73 字
+                    1.3k 字
                   </span>
                 
 
@@ -153,7 +153,7 @@
                       <i class="iconfont icon-clock-fill"></i>
                     
                     
-                    1
+                    15
                      分钟
                   </span>
                 
@@ -182,24 +182,143 @@
           <div class="post-content mx-auto" id="post">
             
             <article class="markdown-body">
-              <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><pre><code class="hljs bash">$ hexo new <span class="hljs-string">"My New Post"</span></code></pre>
+              <blockquote>
+<p>IRC是Internet Relay Chat 的英文缩写，中文一般称为互联网中继聊天。它是由芬兰人Jarkko Oikarinen于1988年首创的一种网络聊天协议。经过十年的发展，目前世界上有超过60个国家提供了IRC的服务。IRC的工作原理非常简单，您只要在自己的PC上运行客户端软件，然后通过因特网以IRC协议连接到一台IRC服务器上即可。它的特点是速度非常之快，聊天时几乎没有延迟的现象，并且只占用很小的带宽资源。所有用户可以在一个被称为&quot;Channel&quot;（频道）的地方就某一话题进行交谈或密谈。每个IRC的使用者都有一个Nickname（昵称）。</p>
+</blockquote>
+<p>搭建IRC服务器主要是为了和研究团队的成员们保持联系。下面简单说一下自主搭建IRC服务器的过程。</p>
+<hr>
+<h1 id="安装-UnrealIRCd"><a href="#安装-UnrealIRCd" class="headerlink" title="安装 UnrealIRCd"></a>安装 UnrealIRCd</h1><p><a href="https://www.unrealircd.org" target="_blank" rel="noopener">UnrealIRCd</a>是一个IRC服务端守护进程。具体的可以看官方的说明.</p>
+<blockquote>
+<p>UnrealIRCd is an Open Source IRC Server, serving thousands of networks since 1999. It runs on Linux, OS X and Windows and is currently the most widely deployed IRCd with a market share of over 50%. UnrealIRCd is a highly advanced IRCd with a strong focus on modularity, an advanced and highly configurable configuration file. Key features include SSL, cloaking, its advanced anti-flood and anti-spam systems, swear filtering and module support. We are also particularly proud on our extensive online documentation.</p>
+</blockquote>
+<p><a href="https://www.unrealircd.org/docs/Installing_from_source" target="_blank" rel="noopener">官方文档</a>里安装过程也说的很明白了，下面总结一下。</p>
+<pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 测试环境为 Ubuntu 16.04 LTS</span>
+<span class="hljs-meta">#</span><span class="bash"> 注意不要以root身份安装，可能会导致安全问题。</span>
 
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><pre><code class="hljs bash">$ hexo server</code></pre>
+<span class="hljs-meta">#</span><span class="bash"> 首先下载最新的源码</span>
+wget --no-check-certificate --trust-server-names https://www.unrealircd.org/downloads/unrealircd-latest.tar.gz
 
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><pre><code class="hljs bash">$ hexo generate</code></pre>
+<span class="hljs-meta">#</span><span class="bash"> 解压并进入目录</span>
+tar -zxvf unrealircd-4.0.17
+cd unrealircd-4.0.17
 
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><pre><code class="hljs bash">$ hexo deploy</code></pre>
+<span class="hljs-meta">#</span><span class="bash"> 运行配置（注意大小写）</span>
+<span class="hljs-meta">#</span><span class="bash"> 如果机器没有安装gcc、make、openssl-devel等可能会报错。按照错误提示安装即可。</span>
+<span class="hljs-meta">#</span><span class="bash"> 默认配置一路回车即可，组织名称可按需配置。</span>
+./Config 
 
-<p>More info: <a href="https://hexo.io/docs/one-command-deployment.html" target="_blank" rel="noopener">Deployment</a></p>
+<span class="hljs-meta">#</span><span class="bash"> make &amp; install</span>
+make
+make install
+
+<span class="hljs-meta">#</span><span class="bash"> 进入到安装的目录（默认为～下），复制配置文件模版并启动</span>
+cd ~/unrealircd
+cp conf/examples/example.conf conf/unrealircd.conf</code></pre>
+
+<p>如果启动失败，可去官方的<a href="https://www.unrealircd.org/docs/FAQ" target="_blank" rel="noopener">FAQ</a>界面寻求帮助，以下列出我遇到的一些问题。<br><br></p>
+<p><img src="/img/irc-err0.jpeg" srcset="/img/loading.gif" alt=""></p>
+<p>主要是默认信息没有修改和密钥的问题，对应着行号解决一下。</p>
+<p><img src="/img/irc-err1.jpeg" srcset="/img/loading.gif" alt=""></p>
+<p>修改oper后面的name和下面的password。</p>
+<p>第二和第三条报错注释里说了怎么解决。执行如下命令然后把生成的key贴到cloak-keys的第二三条即可。</p>
+<pre><code class="hljs shell">./unrealircd gencloak</code></pre>
+<p>最后一条错误改一下邮箱即可。</p>
+<p>别忘了加分号。</p>
+<p>贴一下启动成功的图。</p>
+<p><img src="/img/irc-success.jpeg" srcset="/img/loading.gif" alt=""></p>
+<p>可能还需要添加防火墙例外（或ECS安全策略）以确保外部访问正常。</p>
+<hr>
+<p><del>## 补充内容</p>
+<p><del>如果想开启iOS端的消息推送（仅限Mutter），还需配置IRC服务端连接至苹果推送服务。Mutter提供了<a href="https://bitbucket.org/jmclough/mutter-push/overview" target="_blank" rel="noopener">Mutter Push ZNC Module</a>，点击以查看更多，下面简单翻译一下。</p>
+<pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 下载并解压模块，进入解压出的文件夹</span>
+wget https://bitbucket.org/jmclough/mutter-push/get/master.zip
+unzip -d mutter -j master.zip
+cd mutter
+
+<span class="hljs-meta">#</span><span class="bash"> 安装依赖（Python、requests包）</span>
+sudo apt-get install python3-pip
+sudo pip3 install requests
+
+<span class="hljs-meta">#</span><span class="bash"> 加载 ModPython 模块</span>
+/znc loadmod modpython
+
+<span class="hljs-meta">#</span><span class="bash"> 拷贝模块至模块目录下</span>
+cp mutter.py ~/.znc/modules/
+
+<span class="hljs-meta">#</span><span class="bash"> 加载ZNC模块</span>
+/znc loadmod mutter</code></pre>
+
+<hr>
+<h1 id="客户端安装与测试"><a href="#客户端安装与测试" class="headerlink" title="客户端安装与测试"></a>客户端安装与测试</h1><p>简单介绍一下不同环境下IRC客户端的安装。客户端采用基于终端的<a href="https://irssi.org" target="_blank" rel="noopener">Irssi</a>，经典的IRC文本聊天器。相关GUI版本在此不作介绍。</p>
+<h2 id="NIX"><a href="#NIX" class="headerlink" title="*NIX"></a>*NIX</h2><p>仅介绍macOS和Ubuntu环境，其他环境相差无几。</p>
+<h3 id="macOS"><a href="#macOS" class="headerlink" title="macOS"></a>macOS</h3><p>如果mac上从安装包管理工具，请先安装brew（或需要先安装Xcode并运行一次，安装相关开发者工具）。</p>
+<p>依次运行下面的命令安装Homebrew，更新源并安装Irssi</p>
+<pre><code class="hljs shell">/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+brew update
+brew install irssi</code></pre>
+
+<p>如果速度慢则请参考LUG@USTC考虑更换Homebrew源。</p>
+<p><a href="https://lug.ustc.edu.cn/wiki/mirrors/help/brew.git" target="_blank" rel="noopener">替换及重置Homebrew默认源</a></p>
+<p><a href="https://lug.ustc.edu.cn/wiki/mirrors/help/homebrew-bottles" target="_blank" rel="noopener">Homebrew Bottles源</a></p>
+<p>安装完成后运行irssi。</p>
+<pre><code class="hljs shell">irssi</code></pre>
+
+<p>简单介绍一下Irssi中的入门命令。</p>
+<pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 连接到服务器</span>
+/connect [IP]
+
+<span class="hljs-meta">#</span><span class="bash"> 更改昵称（可选）</span>
+/nick [nickname]
+
+<span class="hljs-meta">#</span><span class="bash"> 加入频道（若无则创建）</span>
+/channel [channel]
+
+<span class="hljs-meta">#</span><span class="bash"> 退出当前频道</span>
+/wc
+
+<span class="hljs-meta">#</span><span class="bash"> 断开服务器</span>
+/disconnect
+
+<span class="hljs-meta">#</span><span class="bash"> 退出程序</span>
+/quit
+
+<span class="hljs-meta">#</span><span class="bash"> 帮助</span>
+/help
+
+<span class="hljs-meta">#</span><span class="bash"> 命令帮助</span>
+/help [command]</code></pre>
+
+<p>进一步操作可参考<a href="https://irssi.org/documentation/" target="_blank" rel="noopener">官方完备的说明文档</a>。</p>
+<h3 id="Ubuntu"><a href="#Ubuntu" class="headerlink" title="Ubuntu"></a>Ubuntu</h3><p>与macOS类似，简单介绍一下。</p>
+<pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 更新源并安装</span>
+sudo apt-get update
+sudo apt-get install irssi
+
+<span class="hljs-meta">#</span><span class="bash"> 运行</span>
+irssi
+
+<span class="hljs-meta">#</span><span class="bash"> 下面的操作参考macOS中的介绍</span></code></pre>
+
+<h2 id="Windows"><a href="#Windows" class="headerlink" title="Windows"></a>Windows</h2><p>在Windows下，推荐使用WSL(Windows Subsystem for Linux)，然后参考Ubuntu的安装和操作进行。相关的GUI版本在此不作介绍。</p>
+<p><a href="https://blog.csdn.net/kkkloveyou/article/details/54897586" target="_blank" rel="noopener">如何安装WSL</a></p>
+<h2 id="移动端"><a href="#移动端" class="headerlink" title="移动端"></a>移动端</h2><h3 id="iOS"><a href="#iOS" class="headerlink" title="iOS"></a>iOS</h3><p>在App Store搜索Mutter并安装。</p>
+<p>安装后打开Mutter，点击左上角的加号添加服务器。输入名称、IP或域名、昵称等添加一个连接。</p>
+<p>进入服务器后，点击右上角的三个点，变更频道至协商好的频道（别忘了#号）。</p>
+<p>Let’s chat.</p>
+<h3 id="Android"><a href="#Android" class="headerlink" title="Android"></a>Android</h3><p>Android下的客户端众多，根据喜好选择下载即可。推荐一款liteIRC。</p>
+<p>好了，就这么多，有空再更。</p>
 
             </article>
             <hr>
             <div>
               <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/%E6%9C%8D%E5%8A%A1/">服务</a>
+                    
+                  </div>
                 
                 
               </div>
@@ -211,15 +330,15 @@
                   <div class="post-prev col-6">
                     
                     
+                      <a href="/2018/05/13/2018-05-11-Cloudera%20Manager%20&amp;%20CDH%20%E9%83%A8%E7%BD%B2/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Cloudera Manager & CDH 部署</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
                   </div>
                   <div class="post-next col-6">
                     
-                    
-                      <a href="/2018/05/15/2018-05-15-openstack-default-port-mod/">
-                        <span class="hidden-mobile">Openstack Horizon 默认端口号修改</span>
-                        <span class="visible-mobile">下一篇</span>
-                        <i class="iconfont icon-arrowright"></i>
-                      </a>
                     
                   </div>
                 </div>
@@ -356,7 +475,7 @@
     var typed = new Typed('#subtitle', {
       strings: [
         '  ',
-        "Hello World&nbsp;",
+        "IRC 服务器搭建与测试&nbsp;",
       ],
       cursorChar: "_",
       typeSpeed: 15,
